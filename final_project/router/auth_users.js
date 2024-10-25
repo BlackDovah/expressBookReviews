@@ -55,8 +55,45 @@ regd_users.post("/login", (req, res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
+  const isbn = req.params.isbn;
+  let book = books[isbn];
+  let session_name = req.session.authorization["username"];
+  let review = req.query.review;
+
+  if (book) {
+    // Check if the user has already submitted a review
+    if (book.reviews[session_name]) {
+      // Update existing review
+      book.reviews[session_name] = review;
+      book[isbn] = book;
+      return res.status(200).json({ message: "Your review has been updated successfully!" });
+    } else {
+      // Add new review
+      book.reviews[session_name] = review;
+      book[isbn] = book;
+      return res.status(200).json({ message: "Your review has been added successfully!" });
+    }
+  } else {
+    return res.status(404).json({ message: `Book with ISBN number ${isbn} was not found.` });
+  }
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const isbn = req.params.isbn;
+  let book = books[isbn];
+  let session_name = req.session.authorization["username"];
+
+  if (book) {
+    // Check if the user has already submitted a review
+    if (book.reviews[session_name]) {
+      delete book.reviews[session_name]
+      return res.status(200).json({ message: "Your review has been removed" });
+    } else {
+      return res.status(200).json({ message: "No reviews exist for this user" });
+    };
+  };
+  return res.status(300).json({ message: `Book with ISBN number ${isbn} was not found.` });
 });
 
 module.exports.authenticated = regd_users;
